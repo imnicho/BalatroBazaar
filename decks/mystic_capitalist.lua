@@ -148,43 +148,56 @@ G.FUNCS.bazr_duplicate_card = function(e)
     }))
 end
 
---- UI: Dupe Button (Card:highlight hook, Ortalab pattern) ---
+--- UI: Dupe + vanilla buttons (replaces use_button) ---
 
-function G.UIDEF.bazr_dupe_button(card)
+function G.UIDEF.bazr_dupe_and_sell(card)
     local dupe_price = get_dupe_price(card)
 
-    local dupe = {n=G.UIT.C, config={align = "cr"}, nodes={
-        {n=G.UIT.C, config={
-            ref_table = card,
-            align = "cr",
-            maxw = 1.25,
-            padding = 0.1,
-            r = 0.08,
-            minw = 1.25,
-            minh = 0.6,
-            hover = true,
-            shadow = true,
-            colour = G.C.UI.BACKGROUND_INACTIVE,
-            button = "bazr_duplicate_card",
-            func = "bazr_can_duplicate_card"
-        }, nodes={
-            {n=G.UIT.B, config = {w=0.1, h=0.6}},
-            {n=G.UIT.T, config={
-                text = "Dupe $" .. dupe_price,
-                colour = G.C.UI.TEXT_LIGHT,
-                scale = 0.45,
-                shadow = true
+    -- Get the vanilla use_and_sell_buttons result and extract its rows
+    local vanilla = G.UIDEF.use_and_sell_buttons(card)
+    local vanilla_rows = vanilla
+        and vanilla.nodes and vanilla.nodes[1]
+        and vanilla.nodes[1].nodes or {}
+
+    local dupe = {n=G.UIT.R, config={align = "cl"}, nodes={
+        {n=G.UIT.C, config={align = "cr"}, nodes={
+            {n=G.UIT.C, config={
+                ref_table = card,
+                align = "cr",
+                maxw = 1.25,
+                padding = 0.1,
+                r = 0.08,
+                minw = 1.25,
+                minh = (card.area and card.area.config.type == 'joker') and 0 or 1,
+                hover = true,
+                shadow = true,
+                colour = G.C.UI.BACKGROUND_INACTIVE,
+                button = "bazr_duplicate_card",
+                func = "bazr_can_duplicate_card"
+            }, nodes={
+                {n=G.UIT.B, config = {w=0.1, h=0.6}},
+                {n=G.UIT.T, config={
+                    text = "Dupe $" .. dupe_price,
+                    colour = G.C.UI.TEXT_LIGHT,
+                    scale = 0.45,
+                    shadow = true
+                }}
             }}
         }}
     }}
+
+    -- Stack: vanilla rows first, then dupe row
+    local rows = {}
+    for _, row in ipairs(vanilla_rows) do
+        rows[#rows + 1] = row
+    end
+    rows[#rows + 1] = dupe
 
     return {
         n = G.UIT.ROOT,
         config = {padding = 0, colour = G.C.CLEAR},
         nodes = {
-            {n=G.UIT.C, config={padding = 0.15, align = "cl"}, nodes={
-                {n=G.UIT.R, config={align = "cl"}, nodes={dupe}},
-            }},
+            {n=G.UIT.C, config={padding = 0.15, align = "cl"}, nodes=rows},
         }
     }
 end
@@ -198,22 +211,22 @@ function Card:highlight(is_highlighted)
     if self.area ~= G.jokers and self.area ~= G.consumeables then return end
 
     if is_highlighted then
-        if self.children.bazr_dupe_button then
-            self.children.bazr_dupe_button:remove()
-            self.children.bazr_dupe_button = nil
+        if self.children.use_button then
+            self.children.use_button:remove()
+            self.children.use_button = nil
         end
 
         local x_off = (self.ability and self.ability.consumeable and -0.1 or 0)
-        self.children.bazr_dupe_button = UIBox{
-            definition = G.UIDEF.bazr_dupe_button(self),
+        self.children.use_button = UIBox{
+            definition = G.UIDEF.bazr_dupe_and_sell(self),
             config = {
                 align = "cr",
-                offset = {x = x_off - 0.4, y = 0.8},
+                offset = {x = x_off - 0.4, y = 0},
                 parent = self
             }
         }
-    elseif self.children.bazr_dupe_button then
-        self.children.bazr_dupe_button:remove()
-        self.children.bazr_dupe_button = nil
+    elseif self.children.use_button then
+        self.children.use_button:remove()
+        self.children.use_button = nil
     end
 end
