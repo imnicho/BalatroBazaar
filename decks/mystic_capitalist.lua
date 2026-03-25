@@ -152,7 +152,6 @@ end
 
 function G.UIDEF.bazr_dupe_button(card)
     local dupe_price = get_dupe_price(card)
-    local is_consumable = card.ability and card.ability.consumeable
 
     local dupe = {n=G.UIT.C, config={align = "cr"}, nodes={
         {n=G.UIT.C, config={
@@ -162,7 +161,7 @@ function G.UIDEF.bazr_dupe_button(card)
             padding = 0.1,
             r = 0.08,
             minw = 1.25,
-            minh = (card.area and card.area.config.type == 'joker') and 0 or 1,
+            minh = 0.6,
             hover = true,
             shadow = true,
             colour = G.C.UI.BACKGROUND_INACTIVE,
@@ -179,71 +178,13 @@ function G.UIDEF.bazr_dupe_button(card)
         }}
     }}
 
-    local sell = {n=G.UIT.C, config={align = "cr"}, nodes={
-        {n=G.UIT.C, config={
-            ref_table = card,
-            align = "cr",
-            maxw = 1.25,
-            padding = 0.1,
-            r = 0.08,
-            minw = 1.25,
-            minh = (card.area and card.area.config.type == 'joker') and 0 or 1,
-            hover = true,
-            shadow = true,
-            colour = G.C.UI.BACKGROUND_INACTIVE,
-            one_press = true,
-            button = "sell_card",
-            func = "can_sell_card"
-        }, nodes={
-            {n=G.UIT.B, config = {w=0.1, h=0.6}},
-            {n=G.UIT.T, config={
-                text = localize('b_sell'),
-                colour = G.C.UI.TEXT_LIGHT,
-                scale = 0.45,
-                shadow = true
-            }}
-        }}
-    }}
-
-    local use = is_consumable and {n=G.UIT.C, config={align = "cr"}, nodes={
-        {n=G.UIT.C, config={
-            ref_table = card,
-            align = "cr",
-            maxw = 1.25,
-            padding = 0.1,
-            r = 0.08,
-            minw = 1.25,
-            minh = 1,
-            hover = true,
-            shadow = true,
-            colour = G.C.UI.BACKGROUND_INACTIVE,
-            one_press = true,
-            button = "use_card",
-            func = "can_use_consumeable"
-        }, nodes={
-            {n=G.UIT.B, config = {w=0.1, h=0.6}},
-            {n=G.UIT.T, config={
-                text = localize('b_use'),
-                colour = G.C.UI.TEXT_LIGHT,
-                scale = 0.45,
-                shadow = true
-            }}
-        }}
-    }} or nil
-
-    local rows = {
-        {n=G.UIT.R, config={align = "cl"}, nodes={dupe}},
-        {n=G.UIT.R, config={align = "cl"}, nodes={sell}},
-    }
-    if use then
-        table.insert(rows, 2, {n=G.UIT.R, config={align = "cl"}, nodes={use}})
-    end
-
     return {
         n = G.UIT.ROOT,
         config = {padding = 0, colour = G.C.CLEAR},
         nodes = {
-            {n=G.UIT.C, config={padding = 0.15, align = "cl"}, nodes=rows},
+            {n=G.UIT.C, config={padding = 0.15, align = "cl"}, nodes={
+                {n=G.UIT.R, config={align = "cl"}, nodes={dupe}},
+            }},
         }
     }
 end
@@ -257,22 +198,21 @@ function Card:highlight(is_highlighted)
     if self.area ~= G.jokers and self.area ~= G.consumeables then return end
 
     if is_highlighted then
-        if self.children.use_button then
-            self.children.use_button:remove()
-            self.children.use_button = nil
+        if self.children.bazr_dupe_button then
+            self.children.bazr_dupe_button:remove()
+            self.children.bazr_dupe_button = nil
         end
 
-        local x_off = (self.ability and self.ability.consumeable and -0.1 or 0)
-        self.children.use_button = UIBox{
+        self.children.bazr_dupe_button = UIBox{
             definition = G.UIDEF.bazr_dupe_button(self),
             config = {
-                align = "cr",
-                offset = {x = x_off - 0.4, y = 0},
+                align = "bmi",
+                offset = {x = 0, y = 0.65},
                 parent = self
             }
         }
-    elseif self.children.use_button then
-        self.children.use_button:remove()
-        self.children.use_button = nil
+    elseif self.children.bazr_dupe_button then
+        self.children.bazr_dupe_button:remove()
+        self.children.bazr_dupe_button = nil
     end
 end
