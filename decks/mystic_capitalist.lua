@@ -203,12 +203,12 @@ function Card:highlight(is_highlighted)
             self.children.bazr_dupe_button = nil
         end
 
-        local x_off = (self.ability and self.ability.consumeable and 0.1 or 0)
+        local x_off = (self.ability and self.ability.consumeable and -0.1 or 0)
         self.children.bazr_dupe_button = UIBox{
             definition = G.UIDEF.bazr_dupe_button(self),
             config = {
-                align = "cl",
-                offset = {x = x_off + 0.4, y = 0},
+                align = "cr",
+                offset = {x = x_off - 0.4, y = 0.8},
                 parent = self
             }
         }
