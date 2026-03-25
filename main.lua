@@ -3,7 +3,7 @@
 --- Atlases ---
 
 SMODS.Atlas{
-    key = "decks",
+    key = "back",
     path = "mystic_capitalist.png",
     px = 71,
     py = 95

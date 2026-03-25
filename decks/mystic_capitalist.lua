@@ -4,7 +4,7 @@
 
 SMODS.Back{
     key = "mystic_capitalist",
-    atlas = "decks",
+    atlas = "back",
     pos = { x = 0, y = 0 },
     config = {},
     loc_txt = {
