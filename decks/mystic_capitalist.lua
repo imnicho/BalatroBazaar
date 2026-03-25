@@ -200,23 +200,22 @@ function Card:highlight(is_highlighted)
     if self.area ~= G.jokers and self.area ~= G.consumeables then return end
 
     if is_highlighted then
-        if self.children.bazr_dupe_button then
-            self.children.bazr_dupe_button:remove()
-            self.children.bazr_dupe_button = nil
+        if self.children.use_button then
+            self.children.use_button:remove()
+            self.children.use_button = nil
         end
 
         local x_off = (self.ability and self.ability.consumeable and -0.1 or 0)
-        self.children.bazr_dupe_button = UIBox{
+        self.children.use_button = UIBox{
             definition = G.UIDEF.bazr_dupe_button(self),
             config = {
                 align = "cr",
                 offset = {x = x_off - 0.4, y = 0},
-                parent = self,
-                id = "bazr_dupe"
+                parent = self
             }
         }
-    elseif self.children.bazr_dupe_button then
-        self.children.bazr_dupe_button:remove()
-        self.children.bazr_dupe_button = nil
+    elseif self.children.use_button then
+        self.children.use_button:remove()
+        self.children.use_button = nil
     end
 end
