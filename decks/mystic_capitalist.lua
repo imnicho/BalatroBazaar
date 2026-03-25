@@ -63,7 +63,13 @@ local function can_duplicate(card)
     if (G.GAME.dollars or 0) < price then return false end
 
     local all_cards = get_all_inventory_cards()
-    if #all_cards < 2 then return false end
+    local sacrifice_count = 0
+    for _, c in ipairs(all_cards) do
+        if c ~= card and not (c.ability and c.ability.eternal) then
+            sacrifice_count = sacrifice_count + 1
+        end
+    end
+    if sacrifice_count == 0 then return false end
 
     if is_joker and #G.jokers.cards >= (G.jokers.config.card_limit or 5) then return false end
     if is_consumable and #G.consumeables.cards >= (G.consumeables.config.card_limit or 2) then return false end
@@ -96,7 +102,7 @@ G.FUNCS.bazr_duplicate_card = function(e)
     local candidates = {}
     local all_cards = get_all_inventory_cards()
     for _, c in ipairs(all_cards) do
-        if c ~= card then
+        if c ~= card and not (c.ability and c.ability.eternal) then
             candidates[#candidates + 1] = c
         end
     end
@@ -193,11 +199,36 @@ function G.UIDEF.bazr_dupe_and_sell(card)
     end
     rows[#rows + 1] = dupe
 
+    -- Shrink all buttons when 3+ are stacked to prevent overflow
+    if #rows >= 3 then
+        local function compact_nodes(node)
+            if not node then return end
+            if node.config then
+                if node.n == G.UIT.T then
+                    node.config.scale = (node.config.scale or 0.45) * 0.78
+                elseif node.n == G.UIT.B then
+                    node.config.h = (node.config.h or 0.6) * 0.5
+                elseif node.n == G.UIT.C and node.config.button then
+                    node.config.padding = math.min(node.config.padding or 0.1, 0.05)
+                    node.config.minh = 0
+                end
+            end
+            if node.nodes then
+                for _, child in ipairs(node.nodes) do
+                    compact_nodes(child)
+                end
+            end
+        end
+        for _, row in ipairs(rows) do
+            compact_nodes(row)
+        end
+    end
+
     return {
         n = G.UIT.ROOT,
         config = {padding = 0, colour = G.C.CLEAR},
         nodes = {
-            {n=G.UIT.C, config={padding = 0.15, align = "cl"}, nodes=rows},
+            {n=G.UIT.C, config={padding = 0.1, align = "cl"}, nodes=rows},
         }
     }
 end
