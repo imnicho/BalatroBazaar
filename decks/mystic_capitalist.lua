@@ -7,6 +7,16 @@ SMODS.Back{
     atlas = "decks",
     pos = { x = 0, y = 0 },
     config = {},
+    loc_txt = {
+        name = "Mystic Capitalist Deck",
+        text = {
+            "{C:attention}Duplicate{} any Joker or Consumable",
+            "for a price based on {C:attention}rarity{}.",
+            "{s:0.8,C:inactive}($10/$20/$30/$50 for C/UC/R/L){}",
+            "Each duplication {C:red}destroys{} one",
+            "other random Joker or Consumable."
+        }
+    },
     apply = function(self, back)
         G.GAME.mystic_capitalist = true
     end
@@ -151,7 +161,7 @@ function G.UIDEF.bazr_dupe_button(card)
             padding = 0.1,
             r = 0.08,
             minw = 1.25,
-            minh = 0.6,
+            minh = (card.area and card.area.config.type == 'joker') and 0 or 1,
             hover = true,
             shadow = true,
             colour = G.C.UI.BACKGROUND_INACTIVE,
@@ -199,8 +209,8 @@ function Card:highlight(is_highlighted)
         self.children.bazr_dupe_button = UIBox{
             definition = G.UIDEF.bazr_dupe_button(self),
             config = {
-                align = "bmi",
-                offset = {x = 0, y = 0.65},
+                align = "cr",
+                offset = {x = x_off - 0.4, y = 0},
                 parent = self,
                 id = "bazr_dupe"
             }
